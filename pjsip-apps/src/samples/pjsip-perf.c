@@ -1041,7 +1041,8 @@ static pj_status_t make_call(const pj_str_t *dst_uri)
 				   &app.local_contact,	/* local Contact    */
 				   dst_uri,		/* remote URI	    */
 				   dst_uri,		/* remote target    */
-				   &dlg);		/* dialog	    */
+				   &dlg,		/* dialog	    */
+				   NULL);		/* Call-ID */
     if (status != PJ_SUCCESS) {
 	return status;
     }

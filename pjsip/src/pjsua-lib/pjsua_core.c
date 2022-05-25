@@ -23,7 +23,7 @@
 
 #define THIS_FILE   "pjsua_core.c"
 
-#define DEFAULT_RTP_PORT	4000
+#define DEFAULT_RTP_PORT	16384
 
 
 /* Internal prototypes */

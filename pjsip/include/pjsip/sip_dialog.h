@@ -292,7 +292,8 @@ PJ_DECL(pj_status_t) pjsip_dlg_create_uac( pjsip_user_agent *ua,
 					   const pj_str_t *local_contact,
 					   const pj_str_t *remote_uri,
 					   const pj_str_t *target,
-					   pjsip_dialog **p_dlg);
+					   pjsip_dialog **p_dlg,
+					   const pj_str_t *call_id);
 
 /**
  * Variant of pjsip_dlg_create_uac() with additional parameter to specify
@@ -310,7 +311,8 @@ PJ_DECL(pj_status_t) pjsip_dlg_create_uac( pjsip_user_agent *ua,
  */
 PJ_DECL(pj_status_t) pjsip_dlg_create_uac2(
 				const pjsip_dlg_create_uac_param *create_param,
-				pjsip_dialog **p_dlg);
+				pjsip_dialog **p_dlg,
+				const pj_str_t *call_id);
 
 
 #if !DEPRECATED_FOR_TICKET_1902
