@@ -9,7 +9,6 @@
 #undef PJ_OS_HAS_CHECK_STACK
 #define PJ_OS_HAS_CHECK_STACK           0
 #define PJ_LOG_MAX_LEVEL                5
-#define PJ_ENABLE_EXTRA_CHECK           0
 #define PJ_IOQUEUE_MAX_HANDLES          (PJSUA_MAX_CALLS*2)
 #define PJSIP_MAX_TSX_COUNT             ((640*1024)-1)
 #define PJSIP_MAX_DIALOG_COUNT          ((640*1024)-1)
