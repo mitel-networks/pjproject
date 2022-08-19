@@ -338,7 +338,7 @@ static pjsua_call_id alloc_call_id(void)
 	if (pjsua_var.calls[cid].inv == NULL &&
             pjsua_var.calls[cid].async_call.dlg == NULL)
         {
-	    ++pjsua_var.next_call_id;
+	    pjsua_var.next_call_id = cid + 1;
 	    return cid;
 	}
     }
@@ -347,7 +347,7 @@ static pjsua_call_id alloc_call_id(void)
 	if (pjsua_var.calls[cid].inv == NULL &&
             pjsua_var.calls[cid].async_call.dlg == NULL)
         {
-	    ++pjsua_var.next_call_id;
+	    pjsua_var.next_call_id = cid + 1;
 	    return cid;
 	}
     }
@@ -862,6 +862,7 @@ PJ_DEF(pj_status_t) pjsua_call_make_call(pjsua_acc_id acc_id,
 
     /* Find free call slot. */
     call_id = alloc_call_id();
+    PJ_LOG(4,(THIS_FILE, "Making call %d: next_call_id=%d", call_id, pjsua_var.next_call_id));
 
     if (call_id == PJSUA_INVALID_ID) {
 	pjsua_perror(THIS_FILE, "Error making call", PJ_ETOOMANY);
@@ -949,9 +950,9 @@ PJ_DEF(pj_status_t) pjsua_call_make_call(pjsua_acc_id acc_id,
     status = pjsip_dlg_create_uac( pjsip_ua_instance(),
 				   &acc->cfg.id, &contact,
 				   dest_uri,
-                                   (msg_data && msg_data->target_uri.slen?
-                                    &msg_data->target_uri: dest_uri),
-                                   &dlg);
+				   (msg_data && msg_data->target_uri.slen ? &msg_data->target_uri : dest_uri),
+				   &dlg,
+				   (msg_data && msg_data->call_id.slen ? &msg_data->call_id : NULL));
     if (status != PJ_SUCCESS) {
 	pjsua_perror(THIS_FILE, "Dialog creation failed", status);
 	goto on_error;
@@ -1502,6 +1503,7 @@ pj_bool_t pjsua_call_on_incoming(pjsip_rx_data *rdata)
 
     /* Find free call slot. */
     call_id = alloc_call_id();
+    PJ_LOG(4,(THIS_FILE, "Incoming call %d: next_call_id=%d", call_id, pjsua_var.next_call_id));
 
     if (call_id == PJSUA_INVALID_ID) {
 	pjsip_endpt_respond_stateless(pjsua_var.endpt, rdata,

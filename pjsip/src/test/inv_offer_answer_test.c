@@ -438,7 +438,7 @@ static int perform_test(inv_test_param_t *param)
      * Create UAC
      */
     status = pjsip_dlg_create_uac(pjsip_ua_instance(), 
-				  &uri, &uri, &uri, &uri, &dlg);
+				  &uri, &uri, &uri, &uri, &dlg, NULL);
     PJ_ASSERT_RETURN(status==PJ_SUCCESS, -10);
 
     if (inv_test.param.oa[0] == OFFERER_UAC)
