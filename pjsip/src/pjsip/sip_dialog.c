@@ -151,7 +151,8 @@ PJ_DEF(pj_status_t) pjsip_dlg_create_uac( pjsip_user_agent *ua,
                                           const pj_str_t *local_contact,
                                           const pj_str_t *remote_uri,
                                           const pj_str_t *target,
-                                          pjsip_dialog **p_dlg)
+                                          pjsip_dialog **p_dlg,
+                                          const pj_str_t *call_id)
 {
     pjsip_dlg_create_uac_param create_param;
 
@@ -167,12 +168,13 @@ PJ_DEF(pj_status_t) pjsip_dlg_create_uac( pjsip_user_agent *ua,
     if (target)
         create_param.target = *target;
 
-    return pjsip_dlg_create_uac2(&create_param, p_dlg);
+    return pjsip_dlg_create_uac2(&create_param, p_dlg, call_id);
 }
 
 PJ_DEF(pj_status_t) pjsip_dlg_create_uac2(
                                 const pjsip_dlg_create_uac_param *create_param,
-                                pjsip_dialog **p_dlg)
+                                pjsip_dialog **p_dlg,
+                                const pj_str_t *call_id)
 {
     pj_status_t status;
     pj_str_t tmp;
@@ -325,7 +327,14 @@ PJ_DEF(pj_status_t) pjsip_dlg_create_uac2(
 
     /* Generate Call-ID header. */
     dlg->call_id = pjsip_cid_hdr_create(dlg->pool);
-    pj_create_unique_string(dlg->pool, &dlg->call_id->id);
+
+    if (call_id) {
+        /* Copy application provided Call-ID */
+        dlg->call_id->id.ptr = (char*)pj_pool_alloc(dlg->pool, call_id->slen);
+        pj_strcpy(&dlg->call_id->id, call_id);
+    } else {
+        pj_create_unique_string(dlg->pool, &dlg->call_id->id);
+    }
 
     /* Initial route set is empty. */
     pj_list_init(&dlg->route_set);

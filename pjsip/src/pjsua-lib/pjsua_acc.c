@@ -423,6 +423,41 @@ static pj_status_t initialize_acc(unsigned acc_id)
     return PJ_SUCCESS;
 }
 
+/* Allocate one acc id */
+static pjsua_acc_id alloc_acc_id(void)
+{
+    pjsua_acc_id id;
+
+#if 1
+    /* New algorithm: round-robin */
+    if (pjsua_var.next_acc_id >= PJSUA_MAX_ACC || pjsua_var.next_acc_id < 0) {
+        pjsua_var.next_acc_id = 0;
+    }
+
+    for (id=pjsua_var.next_acc_id; id<(int)PJSUA_MAX_ACC; ++id) {
+        if (pjsua_var.acc[id].valid == PJ_FALSE) {
+            ++pjsua_var.next_acc_id;
+            return id;
+        }
+    }
+
+    for (id=0; id < pjsua_var.next_acc_id; ++id) {
+        if (pjsua_var.acc[id].valid == PJ_FALSE) {
+            ++pjsua_var.next_acc_id;
+            return id;
+        }
+    }
+
+#else
+    /* Find empty account id. */
+    for (id=0; id < PJ_ARRAY_SIZE(pjsua_var.acc); ++id) {
+    if (pjsua_var.acc[id].valid == PJ_FALSE)
+        break;
+    }
+#endif
+
+    return PJSUA_INVALID_ID;
+}
 
 /*
  * Add a new account to pjsua.
@@ -449,9 +484,11 @@ PJ_DEF(pj_status_t) pjsua_acc_add( const pjsua_acc_config *cfg,
     PJSUA_LOCK();
 
     /* Find empty account id. */
-    for (id=0; id < PJ_ARRAY_SIZE(pjsua_var.acc); ++id) {
-        if (pjsua_var.acc[id].valid == PJ_FALSE)
-            break;
+    id = alloc_acc_id();
+
+    if (id == PJSUA_INVALID_ID) {
+        pjsua_perror(THIS_FILE, "Error adding account", PJ_ETOOMANY);
+        return PJ_ETOOMANY;
     }
 
     /* Expect to find a slot */

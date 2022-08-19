@@ -469,7 +469,8 @@ int main(int argc, char *argv[])
                                        &local_uri,  /* local Contact */
                                        &dst_uri,    /* remote URI */
                                        &dst_uri,    /* remote target */
-                                       &dlg);       /* dialog */
+                                       &dlg,        /* dialog */
+                                       NULL);       /* Call-ID */
         if (status != PJ_SUCCESS) {
             app_perror(THIS_FILE, "Unable to create UAC dialog", status);
             return 1;

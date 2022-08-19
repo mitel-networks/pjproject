@@ -1710,6 +1710,7 @@ static pj_status_t ssl_send (pj_ssl_sock_t *ssock,
         return PJ_ENOMEM;
     }
     status = ssl_write(ssock, data, size, &nwritten);
+    PJ_LOG(4,(ssock->pool->obj_name, "ssl_send status %d: nwritten=%d", status, nwritten));
     pj_lock_release(ssock->write_mutex);
     
     if (status == PJ_SUCCESS && nwritten == size) {

@@ -1835,7 +1835,7 @@ static void subscribe_buddy_presence(pjsua_buddy_id buddy_id)
                                    &acc->cfg.id,
                                    &contact,
                                    &buddy->uri,
-                                   NULL, &buddy->dlg);
+                                   NULL, &buddy->dlg, NULL);
     if (status != PJ_SUCCESS) {
         pjsua_perror(THIS_FILE, "Unable to create dialog", 
                      status);
@@ -2183,7 +2183,7 @@ pj_status_t pjsua_start_mwi(pjsua_acc_id acc_id, pj_bool_t force_renew)
                                    &acc->cfg.id,
                                    &contact,
                                    &acc->cfg.id,
-                                   NULL, &acc->mwi_dlg);
+                                   NULL, &acc->mwi_dlg, NULL);
     if (status != PJ_SUCCESS) {
         pjsua_perror(THIS_FILE, "Unable to create dialog", status);
         goto on_return;

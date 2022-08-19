@@ -1452,23 +1452,25 @@ static pj_status_t put_frame_imp( pjmedia_port *port,
         silence_frame.type = PJMEDIA_FRAME_TYPE_AUDIO;
         silence_frame.timestamp.u32.lo = pj_ntohl(stream->enc->rtp.out_hdr.ts);
 
-        /* Encode! */
-        status = pjmedia_codec_encode( stream->codec, &silence_frame,
-                                       channel->out_pkt_size -
-                                       sizeof(pjmedia_rtp_hdr),
-                                       &frame_out);
-        if (status != PJ_SUCCESS) {
-            LOGERR_((stream->port.info.name.ptr, status,
-                    "Codec encode() error"));
-            return status;
-        }
+        if (PJMEDIA_ENABLE_SILENCE == 1) {
+            /* Encode! */
+            status = pjmedia_codec_encode( stream->codec, &silence_frame,
+                                        channel->out_pkt_size -
+                                        sizeof(pjmedia_rtp_hdr),
+                                        &frame_out);
+            if (status != PJ_SUCCESS) {
+                LOGERR_((stream->port.info.name.ptr, status,
+                        "Codec encode() error"));
+                return status;
+            }
 
-        /* Encapsulate. */
-        status = pjmedia_rtp_encode_rtp( &channel->rtp,
-                                         channel->pt, 0,
-                                         (int)frame_out.size, rtp_ts_len,
-                                         (const void**)&rtphdr,
-                                         &rtphdrlen);
+            /* Encapsulate. */
+            status = pjmedia_rtp_encode_rtp( &channel->rtp,
+                                            channel->pt, 0,
+                                            (int)frame_out.size, rtp_ts_len,
+                                            (const void**)&rtphdr,
+                                            &rtphdrlen);
+        }
 
     /* Encode audio frame */
     } else if ((frame->type == PJMEDIA_FRAME_TYPE_AUDIO &&

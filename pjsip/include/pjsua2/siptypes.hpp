@@ -855,6 +855,11 @@ struct SipTxOption
     string                  msgBody;
 
     /**
+     * Optional Call-ID to be added to the message
+     */
+    string                  callId;
+
+    /**
      * Content type of the multipart body. If application wants to send
      * multipart message bodies, it puts the parts in multipartParts and set
      * the content type in multipartContentType. If the message already

@@ -157,7 +157,7 @@ void make_call(char *uri, pj_bool_t with_offer)
     pj_status_t status;
 
     status = pjsip_dlg_create_uac(pjsip_ua_instance(),
-                                  &local, &local, &remote, &remote, &dlg);
+                                  &local, &local, &remote, &remote, &dlg, NULL);
     pj_assert(status == PJ_SUCCESS);
 
     pjsip_dlg_inc_lock(dlg);

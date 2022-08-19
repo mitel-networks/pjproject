@@ -632,7 +632,8 @@ int main(int argc, char *argv[])
                                        &local_uri,  /* local Contact */
                                        &dst_uri,    /* remote URI */
                                        &dst_uri,    /* remote target */
-                                       &dlg) );     /* dialog */
+                                       &dlg,        /* dialog */
+                                       NULL) );     /* Call-ID */
 
         CHECK( pjsip_inv_create_uac( dlg, NULL, 0, &call->inv) );
 
