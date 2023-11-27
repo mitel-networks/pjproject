@@ -35,7 +35,6 @@
 
 // Transport
 #define PJSIP_TRANSPORT_IDLE_TIME       600
-#define PJSIP_SSL_DEFAULT_METHOD        PJSIP_SSLV23_METHOD
 #define PJSIP_SSL_DEFAULT_PROTO         (PJ_SSL_SOCK_PROTO_TLS1 | \
                                          PJ_SSL_SOCK_PROTO_TLS1_1 | \
                                          PJ_SSL_SOCK_PROTO_TLS1_2 | \
