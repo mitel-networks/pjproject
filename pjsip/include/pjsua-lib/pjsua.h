@@ -2506,6 +2506,11 @@ struct pjsua_msg_data
     pj_str_t    msg_body;
 
     /**
+     * Optional Call-ID to be added to the message
+     */
+    pj_str_t	call_id;
+
+    /**
      * Content type of the multipart body. If application wants to send
      * multipart message bodies, it puts the parts in \a parts and set
      * the content type in \a multipart_ctype. If the message already
