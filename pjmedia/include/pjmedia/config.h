@@ -1712,6 +1712,10 @@
 #   define PJMEDIA_VID_STREAM_CHECK_RTP_PT      PJMEDIA_STREAM_CHECK_RTP_PT
 #endif
 
+#ifndef PJMEDIA_ENABLE_SILENCE
+#   define PJMEDIA_ENABLE_SILENCE	1
+#endif
+
 /**
  * @}
  */

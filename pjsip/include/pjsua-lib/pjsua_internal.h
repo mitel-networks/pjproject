@@ -528,6 +528,7 @@ struct pjsua_data
     pjsua_acc_id         default_acc;        /**< Default account ID    */
     pjsua_acc            acc[PJSUA_MAX_ACC]; /**< Account array.        */
     pjsua_acc_id         acc_ids[PJSUA_MAX_ACC]; /**< Acc sorted by prio*/
+    pjsua_acc_id         next_acc_id;        /**< Next account id to use*/
 
     /* Calls: */
     pjsua_config         ua_cfg;                /**< UA config.         */
