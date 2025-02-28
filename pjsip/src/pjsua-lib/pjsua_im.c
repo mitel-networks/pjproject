@@ -635,7 +635,7 @@ PJ_DEF(pj_status_t) pjsua_im_send( pjsua_acc_id acc_id,
     }
 
     /* Add additional headers etc. */
-    pjsua_process_msg_data(tdata, msg_data);
+    pjsua_process_msg_data(tdata, msg_data, &acc->cfg.user_agent);
 
     /* Add route set */
     pjsua_set_msg_route_set(tdata, &acc->route_set);
@@ -724,7 +724,7 @@ PJ_DEF(pj_status_t) pjsua_im_typing( pjsua_acc_id acc_id,
                                                       NULL, NULL, -1);
 
     /* Add additional headers etc. */
-    pjsua_process_msg_data(tdata, msg_data);
+    pjsua_process_msg_data(tdata, msg_data, &acc->cfg.user_agent);
 
     /* Add route set */
     pjsua_set_msg_route_set(tdata, &acc->route_set);

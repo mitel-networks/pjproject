@@ -4623,6 +4623,12 @@ typedef struct pjsua_acc_config
      */
     pj_bool_t           enable_rtcp_xr;
 
+    /**
+     * Optional user agent string (default empty). If it's empty, no
+     * User-Agent header included based on pjsua_config.ua_cfg.user_agent.
+     */
+    pj_str_t        user_agent;     /**< User-Agent header      */
+
 } pjsua_acc_config;
 
 

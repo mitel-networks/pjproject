@@ -281,6 +281,7 @@ void AccountSipConfig::readObject(const ContainerNode &node)
     NODE_READ_BOOL      (this_node, authInitialEmpty);
     NODE_READ_STRING    (this_node, authInitialAlgorithm);
     NODE_READ_INT       (this_node, transportId);
+    NODE_READ_STRING    (this_node, userAgent);
 
     ContainerNode creds_node = this_node.readArray("authCreds");
     authCreds.resize(0);
@@ -303,6 +304,7 @@ void AccountSipConfig::writeObject(ContainerNode &node) const
     NODE_WRITE_BOOL     (this_node, authInitialEmpty);
     NODE_WRITE_STRING   (this_node, authInitialAlgorithm);
     NODE_WRITE_INT      (this_node, transportId);
+    NODE_WRITE_STRING   (this_node, userAgent);
 
     ContainerNode creds_node = this_node.writeNewArray("authCreds");
     for (unsigned i=0; i<authCreds.size(); ++i) {
@@ -629,6 +631,7 @@ void AccountConfig::toPj(pjsua_acc_config &ret) const
     ret.auth_pref.algorithm     = str2Pj(sipConfig.authInitialAlgorithm);
     ret.transport_id            = sipConfig.transportId;
     ret.ipv6_sip_use            = sipConfig.ipv6Use;
+    ret.user_agent              = str2Pj(sipConfig.userAgent);
 
     // AccountCallConfig
     ret.call_hold_type          = callConfig.holdType;
@@ -792,6 +795,7 @@ void AccountConfig::fromPj(const pjsua_acc_config &prm,
     sipConfig.authInitialAlgorithm = pj2Str(prm.auth_pref.algorithm);
     sipConfig.transportId       = prm.transport_id;
     sipConfig.ipv6Use           = prm.ipv6_sip_use;
+    sipConfig.userAgent         = pj2Str(prm.user_agent);
 
     // AccountCallConfig
     callConfig.holdType         = prm.call_hold_type;
