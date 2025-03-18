@@ -298,6 +298,12 @@ struct AccountSipConfig : public PersistentObject
      */
     pjsua_ipv6_use      ipv6Use;
 
+    /**
+     * Optional user agent string (default empty). If it's empty,
+     * User-Agent header included based on EpConfig.UaConfig.UserAgent.
+     */
+    string                 userAgent;
+
 public:
     /**
      * Read this object from a container node.

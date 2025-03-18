@@ -562,7 +562,8 @@ on_make_call_med_tp_complete(pjsua_call_id call_id,
     /* Add additional headers etc */
 
     pjsua_process_msg_data( tdata,
-                            call->async_call.call_var.out_call.msg_data);
+                            call->async_call.call_var.out_call.msg_data,
+                            &acc->cfg.user_agent);
 
     /* Must increment call counter now */
     ++pjsua_var.call_cnt;
@@ -2896,7 +2897,7 @@ PJ_DEF(pj_status_t) pjsua_call_answer2(pjsua_call_id call_id,
         goto on_return;
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send the message */
     status = pjsip_inv_send_msg(call->inv, tdata);
@@ -2985,7 +2986,7 @@ static pj_status_t call_inv_end_session(pjsua_call *call,
     }
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send the message */
     status = pjsip_inv_send_msg(call->inv, tdata);
@@ -3284,7 +3285,7 @@ PJ_DEF(pj_status_t) pjsua_call_set_hold2(pjsua_call_id call_id,
     }
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Record the tx_data to keep track the operation */
     call->hold_msg = (void*) tdata;
@@ -3423,7 +3424,7 @@ PJ_DEF(pj_status_t) pjsua_call_reinvite2(pjsua_call_id call_id,
     }
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send the request */
     call->med_update_success = PJ_FALSE;
@@ -3555,7 +3556,7 @@ PJ_DEF(pj_status_t) pjsua_call_update2(pjsua_call_id call_id,
     }
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send the request */
     call->med_update_success = PJ_FALSE;
@@ -3634,7 +3635,7 @@ PJ_DEF(pj_status_t) pjsua_call_xfer( pjsua_call_id call_id,
 
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send. */
     status = pjsip_xfer_send_request(sub, tdata);
@@ -3884,7 +3885,7 @@ PJ_DEF(pj_status_t) pjsua_call_send_im( pjsua_call_id call_id,
     }
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Create IM data and attach to the request. */
     im_data = PJ_POOL_ZALLOC_T(tdata->pool, pjsua_im_data);
@@ -3947,7 +3948,7 @@ PJ_DEF(pj_status_t) pjsua_call_send_typing_ind( pjsua_call_id call_id,
                                                      NULL, NULL, -1);
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send the request. */
     status = pjsip_dlg_send_request( call->inv->dlg, tdata, -1, NULL);
@@ -3998,7 +3999,7 @@ PJ_DEF(pj_status_t) pjsua_call_send_request(pjsua_call_id call_id,
     }
 
     /* Add additional headers etc */
-    pjsua_process_msg_data( tdata, msg_data);
+    pjsua_process_msg_data( tdata, msg_data, &pjsua_var.acc[call->acc_id].cfg.user_agent);
 
     /* Send the request. */
     status = pjsip_dlg_send_request( call->inv->dlg, tdata, -1, NULL);

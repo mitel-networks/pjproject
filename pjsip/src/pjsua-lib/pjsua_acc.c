@@ -98,6 +98,7 @@ PJ_DEF(void) pjsua_acc_config_dup( pj_pool_t *pool,
     pj_strdup_with_null(pool, &dst->rfc5626_instance_id,
                         &src->rfc5626_instance_id);
     pj_strdup_with_null(pool, &dst->rfc5626_reg_id, &src->rfc5626_reg_id);
+    pj_strdup_with_null(pool, &dst->user_agent, &src->user_agent);
 
     dst->proxy_cnt = src->proxy_cnt;
     for (i=0; i<src->proxy_cnt; ++i)
@@ -1165,6 +1166,14 @@ PJ_DEF(pj_status_t) pjsua_acc_modify( pjsua_acc_id acc_id,
         unreg_first = PJ_TRUE;
     }
 
+    /* User Agent */
+    if (pj_strcmp(&acc->cfg.user_agent, &cfg->user_agent)) {
+        pj_strdup_with_null(acc->pool, &acc->cfg.user_agent,
+                            &cfg->user_agent);
+        update_reg = PJ_TRUE;
+        unreg_first = PJ_TRUE;
+    }
+
     /* Reliable provisional response */
     acc->cfg.require_100rel = cfg->require_100rel;
 
@@ -1598,7 +1607,7 @@ PJ_DEF(pj_status_t) pjsua_acc_send_request(pjsua_acc_id acc_id,
     request_data->acc_id = acc_id;
     request_data->token = token;
 
-    pjsua_process_msg_data(tdata, msg_data);
+    pjsua_process_msg_data(tdata, msg_data, &pjsua_var.acc[acc_id].cfg.user_agent);
 
     cap_hdr = pjsip_endpt_get_capability(pjsua_var.endpt, PJSIP_H_ACCEPT, NULL);
     if (cap_hdr) {
@@ -2826,7 +2835,21 @@ static pj_status_t pjsua_regc_init(int acc_id)
     pjsip_regc_add_headers(acc->regc, &acc->cfg.reg_hdr_list);
 
     /* Add other request headers. */
-    if (pjsua_var.ua_cfg.user_agent.slen) {
+    if (acc->cfg.user_agent.slen) {
+        /* Add User-Agent based on account config */
+        pjsip_hdr hdr_list;
+        const pj_str_t STR_USER_AGENT = { "User-Agent", 10 };
+        pjsip_generic_string_hdr *h;
+
+        pj_list_init(&hdr_list);
+
+        h = pjsip_generic_string_hdr_create(pool, &STR_USER_AGENT, 
+                                            &acc->cfg.user_agent);
+        pj_list_push_back(&hdr_list, (pjsip_hdr*)h);
+
+        pjsip_regc_add_headers(acc->regc, &hdr_list);
+    } else if (pjsua_var.ua_cfg.user_agent.slen) {
+        /* Add User-Agent based on ua config */
         pjsip_hdr hdr_list;
         const pj_str_t STR_USER_AGENT = { "User-Agent", 10 };
         pjsip_generic_string_hdr *h;
@@ -3058,7 +3081,7 @@ PJ_DEF(pj_status_t) pjsua_acc_set_registration( pjsua_acc_id acc_id,
         pjsip_regc_add_ref(regc);
         PJSUA_UNLOCK();
         
-        //pjsua_process_msg_data(tdata, NULL);
+        //pjsua_process_msg_data(tdata, NULL, NULL);
         status = pjsip_regc_send( regc, tdata );
         
         PJSUA_LOCK();
