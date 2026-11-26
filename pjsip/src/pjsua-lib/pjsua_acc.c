@@ -168,6 +168,7 @@ PJ_DEF(void) pjsua_acc_config_dup( pj_pool_t *pool,
     pj_strdup_with_null(pool, &dst->rfc5626_instance_id,
                         &src->rfc5626_instance_id);
     pj_strdup_with_null(pool, &dst->rfc5626_reg_id, &src->rfc5626_reg_id);
+    pj_strdup_with_null(pool, &dst->user_agent, &src->user_agent);
 
     dst->proxy_cnt = src->proxy_cnt;
     for (i=0; i<src->proxy_cnt; ++i)
@@ -578,6 +579,35 @@ static pj_status_t initialize_acc(unsigned acc_id)
     return PJ_SUCCESS;
 }
 
+/* Allocate one acc id in a round-robin fashion, so that a recently
+ * removed account id is not immediately reused.
+ */
+static pjsua_acc_id alloc_acc_id(void)
+{
+    pjsua_acc_id id;
+
+    if (pjsua_var.next_acc_id >= (int)PJSUA_MAX_ACC ||
+        pjsua_var.next_acc_id < 0)
+    {
+        pjsua_var.next_acc_id = 0;
+    }
+
+    for (id=pjsua_var.next_acc_id; id<(int)PJSUA_MAX_ACC; ++id) {
+        if (pjsua_var.acc[id].valid == PJ_FALSE) {
+            pjsua_var.next_acc_id = id + 1;
+            return id;
+        }
+    }
+
+    for (id=0; id < pjsua_var.next_acc_id; ++id) {
+        if (pjsua_var.acc[id].valid == PJ_FALSE) {
+            pjsua_var.next_acc_id = id + 1;
+            return id;
+        }
+    }
+
+    return PJSUA_INVALID_ID;
+}
 
 /* Server affinity (#4964) helpers --------------------------------------- */
 
@@ -876,9 +906,13 @@ PJ_DEF(pj_status_t) pjsua_acc_add( const pjsua_acc_config *cfg,
     PJSUA_LOCK();
 
     /* Find empty account id. */
-    for (id=0; id < PJ_ARRAY_SIZE(pjsua_var.acc); ++id) {
-        if (pjsua_var.acc[id].valid == PJ_FALSE)
-            break;
+    id = alloc_acc_id();
+
+    if (id == PJSUA_INVALID_ID) {
+        pjsua_perror(THIS_FILE, "Error adding account", PJ_ETOOMANY);
+        PJSUA_UNLOCK();
+        pj_log_pop_indent();
+        return PJ_ETOOMANY;
     }
 
     /* Expect to find a slot */
@@ -1636,6 +1670,14 @@ PJ_DEF(pj_status_t) pjsua_acc_modify( pjsua_acc_id acc_id,
         unreg_first = PJ_TRUE;
     }
 
+    /* User Agent */
+    if (pj_strcmp(&acc->cfg.user_agent, &cfg->user_agent)) {
+        pj_strdup_with_null(acc->pool, &acc->cfg.user_agent,
+                            &cfg->user_agent);
+        update_reg = PJ_TRUE;
+        unreg_first = PJ_TRUE;
+    }
+
     /* Reliable provisional response */
     acc->cfg.require_100rel = cfg->require_100rel;
 
@@ -2140,8 +2182,10 @@ PJ_DEF(pj_status_t) pjsua_acc_send_request(pjsua_acc_id acc_id,
     request_data->acc_id = acc_id;
     request_data->token = token;
 
-    if (msg_data)
-        pjsua_process_msg_data(tdata, msg_data);
+    /* Always process, so the account User-Agent is added even when
+     * msg_data is NULL (pjsua_process_msg_data() is NULL-safe).
+     */
+    pjsua_process_msg_data(tdata, msg_data, &pjsua_var.acc[acc_id].cfg.user_agent);
 
     cap_hdr = pjsip_endpt_get_capability(pjsua_var.endpt, PJSIP_H_ACCEPT, NULL);
     if (cap_hdr) {
@@ -3754,16 +3798,21 @@ static pj_status_t pjsua_regc_init(int acc_id)
         goto on_return;
     }
 
-    /* Add other request headers. */
-    if (pjsua_var.ua_cfg.user_agent.slen) {
+    /* Add other request headers. The account specific User-Agent, if set,
+     * takes precedence over the global one from pjsua_config.
+     */
+    if (acc->cfg.user_agent.slen || pjsua_var.ua_cfg.user_agent.slen) {
+        const pj_str_t *user_agent = acc->cfg.user_agent.slen ?
+                                     &acc->cfg.user_agent :
+                                     &pjsua_var.ua_cfg.user_agent;
         pjsip_hdr hdr_list;
         const pj_str_t STR_USER_AGENT = { "User-Agent", 10 };
         pjsip_generic_string_hdr *h;
 
         pj_list_init(&hdr_list);
 
-        h = pjsip_generic_string_hdr_create(pool, &STR_USER_AGENT, 
-                                            &pjsua_var.ua_cfg.user_agent);
+        h = pjsip_generic_string_hdr_create(pool, &STR_USER_AGENT,
+                                            user_agent);
         pj_list_push_back(&hdr_list, (pjsip_hdr*)h);
 
         status = pjsip_regc_add_headers(acc->regc, &hdr_list);
@@ -4052,7 +4101,7 @@ static pj_status_t acc_set_registration(pjsua_acc_id acc_id, pj_bool_t renew,
             num_locks = 1;
         }
         
-        //pjsua_process_msg_data(tdata, NULL);
+        //pjsua_process_msg_data(tdata, NULL, NULL);
         status = pjsip_regc_send( regc, tdata );
         
         PJSUA_RELOCK(num_locks);

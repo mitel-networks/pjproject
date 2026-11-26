@@ -425,7 +425,7 @@ static pj_status_t create_rtp_rtcp_sock(pjsua_call_media *call_med,
                                         const pjmedia_sdp_session *rem_sdp)
 {
     enum {
-        RTP_RETRY = 100
+        RTP_RETRY = 5000
     };
     int i;
     pj_bool_t use_ipv6, use_nat64;
@@ -511,7 +511,10 @@ static pj_status_t create_rtp_rtcp_sock(pjsua_call_media *call_med,
         if (status != PJ_SUCCESS) {
             pj_sock_close(sock[0]);
             sock[0] = PJ_INVALID_SOCKET;
-            PJ_PERROR(1,(THIS_FILE, status, "RTP socket bind() at %s error",
+            /* Logged at level 5: with a large RTP_RETRY, port collisions
+             * are expected and would otherwise flood the log.
+             */
+            PJ_PERROR(5,(THIS_FILE, status, "RTP socket bind() at %s error",
                       pj_sockaddr_print(&bound_addr, addr_buf,
                                         sizeof(addr_buf), 3)));
             continue;
@@ -559,7 +562,10 @@ static pj_status_t create_rtp_rtcp_sock(pjsua_call_media *call_med,
             pj_sock_close(sock[1]);
             sock[1] = PJ_INVALID_SOCKET;
 
-            PJ_PERROR(1,(THIS_FILE, status, "RTCP socket bind() at %s error",
+            /* Logged at level 5: with a large RTP_RETRY, port collisions
+             * are expected and would otherwise flood the log.
+             */
+            PJ_PERROR(5,(THIS_FILE, status, "RTCP socket bind() at %s error",
                       pj_sockaddr_print(&bound_addr, addr_buf,
                                         sizeof(addr_buf), 3)));
             continue;

@@ -338,6 +338,12 @@ struct AccountSipConfig : public PersistentObject
      */
     bool        autoRespondSipMessage;
 
+    /**
+     * Optional user agent string (default empty). If it's empty,
+     * User-Agent header included based on EpConfig.UaConfig.UserAgent.
+     */
+    string                 userAgent;
+
 public:
     /**
      * Read this object from a container node.

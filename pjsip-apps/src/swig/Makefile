@@ -7,7 +7,7 @@ else
     ifneq ($(findstring ios,$(TARGET_NAME)),)
   	LANG = csharp
     else
-  	LANG = python java
+  	LANG = python
     endif
 endif
 

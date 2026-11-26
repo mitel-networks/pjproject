@@ -22,7 +22,7 @@
 
 #define THIS_FILE   "pjsua_core.c"
 
-#define DEFAULT_RTP_PORT        4000
+#define DEFAULT_RTP_PORT        16384
 
 
 /* Internal prototypes */
@@ -3482,15 +3482,25 @@ PJ_DEF(pj_status_t) pjsua_transport_lis_restart(pjsua_transport_id id,
  * when sending requests.
  */
 void pjsua_process_msg_data(pjsip_tx_data *tdata,
-                            const pjsua_msg_data *msg_data)
+                            const pjsua_msg_data *msg_data,
+                            const pj_str_t *user_agent)
 {
     pj_bool_t allow_body;
     const pjsip_hdr *hdr;
 
     /* Always add User-Agent */
-    if (pjsua_var.ua_cfg.user_agent.slen && 
+    if (user_agent && user_agent->slen && tdata->msg->type == PJSIP_REQUEST_MSG) {
+        /* Add account specific User-Agent, if provided */
+        const pj_str_t STR_USER_AGENT = { "User-Agent", 10 };
+        pjsip_hdr *h;
+        h = (pjsip_hdr*)pjsip_generic_string_hdr_create(tdata->pool, 
+                                                        &STR_USER_AGENT, 
+                                                        user_agent);
+        pjsip_msg_add_hdr(tdata->msg, h);
+    } else if (pjsua_var.ua_cfg.user_agent.slen && 
         tdata->msg->type == PJSIP_REQUEST_MSG) 
     {
+        /* Add User-Agent based on ua config */
         const pj_str_t STR_USER_AGENT = { "User-Agent", 10 };
         pjsip_hdr *h;
         h = (pjsip_hdr*)pjsip_generic_string_hdr_create(tdata->pool, 

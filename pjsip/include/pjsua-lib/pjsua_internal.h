@@ -681,6 +681,7 @@ struct pjsua_data
     pjsua_acc_id         default_acc;        /**< Default account ID    */
     pjsua_acc            acc[PJSUA_MAX_ACC]; /**< Account array.        */
     pjsua_acc_id         acc_ids[PJSUA_MAX_ACC]; /**< Acc sorted by prio*/
+    pjsua_acc_id         next_acc_id;        /**< Next account id to use*/
 
     /* Calls: */
     pjsua_config         ua_cfg;                /**< UA config.         */
@@ -1112,7 +1113,8 @@ pjsip_accept_hdr* pjsua_im_create_accept(pj_pool_t *pool);
  * when sending requests.
  */
 void pjsua_process_msg_data(pjsip_tx_data *tdata,
-                            const pjsua_msg_data *msg_data);
+                            const pjsua_msg_data *msg_data,
+                            const pj_str_t *user_agent);
 
 
 /*

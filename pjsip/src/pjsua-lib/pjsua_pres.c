@@ -1186,7 +1186,7 @@ static pj_bool_t pres_on_rx_request(pjsip_rx_data *rdata)
         }
 
         /* Add header list, if any */
-        pjsua_process_msg_data(tdata, &msg_data);
+        pjsua_process_msg_data(tdata, &msg_data, &acc->cfg.user_agent);
 
         /* Send the response */
         status = pjsip_dlg_send_response(dlg, pjsip_rdata_get_tsx(rdata),
@@ -1299,7 +1299,7 @@ PJ_DEF(pj_status_t) pjsua_pres_notify( pjsua_acc_id acc_id,
         if (!with_body) {
             tdata->msg->body = NULL;
         }
-        pjsua_process_msg_data(tdata, msg_data);
+        pjsua_process_msg_data(tdata, msg_data, &acc->cfg.user_agent);
         status = pjsip_pres_send_request( srv_pres->sub, tdata);
     }
 
@@ -1444,7 +1444,7 @@ static pj_status_t send_publish(int acc_id, pj_bool_t active)
     }
 
     /* Add headers etc */
-    pjsua_process_msg_data(tdata, NULL);
+    pjsua_process_msg_data(tdata, NULL, &acc->cfg.user_agent);
 
     /* Set Via sent-by */
     if (acc->cfg.allow_via_rewrite && acc->via_addr.host.slen > 0) {
@@ -1674,7 +1674,7 @@ void pjsua_pres_update_acc(int acc_id, pj_bool_t force)
             pjsip_pres_set_status(uapres->sub, &pres_status);
 
             if (pjsip_pres_current_notify(uapres->sub, &tdata)==PJ_SUCCESS) {
-                pjsua_process_msg_data(tdata, NULL);
+                pjsua_process_msg_data(tdata, NULL, &acc->cfg.user_agent);
                 pjsip_pres_send_request(uapres->sub, tdata);
             }
         }
@@ -2185,7 +2185,7 @@ static void subscribe_buddy(pjsua_buddy_id buddy_id,
         return;
     }
     buddy->presence = presence;
-    pjsua_process_msg_data(tdata, NULL);
+    pjsua_process_msg_data(tdata, NULL, &acc->cfg.user_agent);
 
     /* Send request. Note that if the send operation fails sync-ly, e.g:
      * gethostbyname() error, tsx callback may have been invoked which may
@@ -2243,7 +2243,10 @@ static void unsubscribe_buddy(pjsua_buddy_id buddy_id,
         status = pjsip_dlg_event_initiate( buddy->sub, 0, &tdata);
     }
     if (status == PJ_SUCCESS) {
-        pjsua_process_msg_data(tdata, NULL);
+        pjsua_process_msg_data(tdata, NULL,
+                               (pjsua_acc_is_valid(buddy->acc_id) ?
+                                &pjsua_var.acc[buddy->acc_id].cfg.user_agent :
+                                NULL));
         if (presence)
             status = pjsip_pres_send_request( buddy->sub, tdata );
         else
@@ -2430,7 +2433,7 @@ pj_status_t pjsua_start_mwi(pjsua_acc_id acc_id, pj_bool_t force_renew)
         
         status = pjsip_mwi_initiate(acc->mwi_sub, acc->cfg.mwi_expires, &tdata);
         if (status == PJ_SUCCESS) {
-            pjsua_process_msg_data(tdata, NULL);
+            pjsua_process_msg_data(tdata, NULL, &acc->cfg.user_agent);
             status = pjsip_pres_send_request(acc->mwi_sub, tdata);
         }
 
@@ -2543,7 +2546,7 @@ pj_status_t pjsua_start_mwi(pjsua_acc_id acc_id, pj_bool_t force_renew)
         goto on_return;
     }
 
-    pjsua_process_msg_data(tdata, NULL);
+    pjsua_process_msg_data(tdata, NULL, &acc->cfg.user_agent);
 
     status = pjsip_pres_send_request(acc->mwi_sub, tdata);
     if (status != PJ_SUCCESS) {

@@ -357,6 +357,7 @@ void AccountSipConfig::readObject(const ContainerNode &node)
     NODE_READ_INT       (this_node, transportId);
     NODE_READ_BOOL      (this_node, useSharedAuth);
     NODE_READ_BOOL      (this_node, autoRespondSipMessage);
+    NODE_READ_STRING    (this_node, userAgent);
 
     ContainerNode creds_node = this_node.readArray("authCreds");
     authCreds.resize(0);
@@ -381,6 +382,7 @@ void AccountSipConfig::writeObject(ContainerNode &node) const
     NODE_WRITE_INT      (this_node, transportId);
     NODE_WRITE_BOOL     (this_node, useSharedAuth);
     NODE_WRITE_BOOL     (this_node, autoRespondSipMessage);
+    NODE_WRITE_STRING   (this_node, userAgent);
 
     ContainerNode creds_node = this_node.writeNewArray("authCreds");
     for (unsigned i=0; i<authCreds.size(); ++i) {
@@ -748,6 +750,7 @@ void AccountConfig::toPj(pjsua_acc_config &ret) const
     ret.server_affinity           = sipConfig.serverAffinity;
     ret.use_shared_auth           = sipConfig.useSharedAuth;
     ret.auto_repond_sip_message = sipConfig.autoRespondSipMessage;
+    ret.user_agent                = str2Pj(sipConfig.userAgent);
 
     // AccountCallConfig
     ret.call_hold_type          = callConfig.holdType;
@@ -943,6 +946,7 @@ void AccountConfig::fromPj(const pjsua_acc_config &prm,
     sipConfig.serverAffinity         = prm.server_affinity;
     sipConfig.useSharedAuth          = PJ2BOOL(prm.use_shared_auth);
     sipConfig.autoRespondSipMessage = PJ2BOOL(prm.auto_repond_sip_message);
+    sipConfig.userAgent              = pj2Str(prm.user_agent);
 
     // AccountCallConfig
     callConfig.holdType         = prm.call_hold_type;
